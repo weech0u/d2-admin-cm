@@ -3,7 +3,11 @@ const VueFilenameInjector = require('@d2-projects/vue-filename-injector')
 const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const forElementUI = require('webpack-theme-color-replacer/forElementUI')
 const cdnDependencies = require('./dependencies-cdn')
-const { chain, set, each } = require('lodash')
+const {
+  chain,
+  set,
+  each
+} = require('lodash')
 
 // 拼接路径
 const resolve = dir => require('path').join(__dirname, dir)
@@ -17,7 +21,9 @@ const publicPath = process.env.VUE_APP_PUBLIC_PATH || '/'
 
 // 设置不参与构建的库
 const externals = {}
-cdnDependencies.forEach(pkg => { externals[pkg.name] = pkg.library })
+cdnDependencies.forEach(pkg => {
+  externals[pkg.name] = pkg.library
+})
 
 // 引入文件的 cdn 链接
 const cdn = {
@@ -38,7 +44,7 @@ module.exports = {
   lintOnSave: true,
   devServer: {
     publicPath, // 和 publicPath 保持一致
-    disableHostCheck: process.env.NODE_ENV === 'development' // 关闭 host check，方便使用 ngrok 之类的内网转发工具
+    disableHostCheck: process.env.NODE_ENV === 'development', // 关闭 host check，方便使用 ngrok 之类的内网转发工具
   },
   css: {
     loaderOptions: {

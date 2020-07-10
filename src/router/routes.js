@@ -26,7 +26,7 @@ const frameIn = [
         path: 'page1',
         name: 'page1',
         meta: {
-          title: '页面 1',
+          title: '公司列表',
           auth: true
         },
         component: _import('demo/page1')
@@ -35,7 +35,7 @@ const frameIn = [
         path: 'page2',
         name: 'page2',
         meta: {
-          title: '页面 2',
+          title: '合同列表',
           auth: true
         },
         component: _import('demo/page2')
@@ -44,7 +44,7 @@ const frameIn = [
         path: 'page3',
         name: 'page3',
         meta: {
-          title: '页面 3',
+          title: '服务列表',
           auth: true
         },
         component: _import('demo/page3')

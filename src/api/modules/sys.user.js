@@ -55,11 +55,39 @@ export default ({
       data
     })
   },
-  getCompanyList(data = {}) {
+  getList(target, page = 1, ...rest) {
+    let temp = ''
+    if (rest.length != 0) temp = rest[0]
     return request({
-      url: 'company',
+      url: target + '?page=' + page + `&${temp}`,
       method: 'get',
+    })
+  },
+  getOneList(target, id) {
+    return request({
+      url: target + '/' + id,
+      method: 'get',
+    })
+  },
+  addList(target, data) {
+    return request({
+      url: target,
+      method: 'post',
       data
     })
-  }
+  },
+  editList(target, data = {}, id) {
+    return request({
+      url: target + '/' + id,
+      method: 'post',
+      data
+    })
+  },
+  deleteList(target, data = {}, id) {
+    return request({
+      url: target + '/' + id,
+      method: 'delete',
+      data
+    })
+  },
 })

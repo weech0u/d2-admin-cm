@@ -30,7 +30,7 @@
         <el-input
           v-model="keywords"
           style="float:right;width:20%;"
-          placeholder="根据公司名查询"
+          placeholder="根据服务名查询"
         ></el-input>
       </el-row>
     </template>
@@ -45,25 +45,27 @@
         <el-table-column
           prop="name"
           label="服务名"
-          width="180"
+          width="130"
         ></el-table-column>
-        <el-table-column :show-overflow-tooltip="true" prop="price_info" label="价格信息"></el-table-column>
-        <el-table-column prop="pay_way" label="结算方式"></el-table-column>
-        <el-table-column prop="usage_balance" label="使用量"></el-table-column>
+        <el-table-column width="190" :show-overflow-tooltip="true" prop="price_info" label="价格信息"></el-table-column>
+        <el-table-column prop="pay_way" label="结算方式" width="110"></el-table-column>
+        <el-table-column prop="usage_balance" label="使用量" width="110"></el-table-column>
         <el-table-column
           prop="rest_balance"
           label="余额"
+          width="100"
         ></el-table-column>
         <el-table-column
           prop="contract"
           label="合同编号/合同状态"
         >
         <template slot-scope="scope">
-            <span>{{ scope.row.contract }}</span>
-            <span style="font-weight:bold;color:green">【在期】</span>
+            <span>{{ scope.row.contract[0] }}</span>
+            <span style="font-weight:bold;color:green" v-if="scope.row.contract[1]">【在期】</span>
+            <span style="font-weight:bold;color:red" v-if="!scope.row.contract[1]">【已过期】</span>
         </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="145">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -172,7 +174,8 @@ export default {
         price_info: "",
         pay_way: "",
         usage_balance: "",
-        rest_balance: ""
+        rest_balance: "",
+        contract: ""
       },
       total_count: 0,
       currentPage1: 1,

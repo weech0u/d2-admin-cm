@@ -16,7 +16,7 @@
         flex="dir:top main:justify cross:stretch box:justify">
         <div class="page-login--content-header">
           <p class="page-login--content-header-motto">
-            时间是一切财富中最宝贵的财富
+            <!-- 时间是一切财富中最宝贵的财富 -->
           </p>
         </div>
         <div
@@ -50,14 +50,14 @@
                   </el-input>
                 </el-form-item>
                 <el-form-item prop="code">
-                  <el-input
+                  <!-- <el-input
                     type="text"
                     v-model="formLogin.code"
                     placeholder="验证码">
                     <template slot="append">
                       <img class="login-code" src="./image/login-code.png">
                     </template>
-                  </el-input>
+                  </el-input> -->
                 </el-form-item>
                 <el-button
                   size="default"
@@ -75,13 +75,13 @@
               <span>注册用户</span>
             </p>
             <!-- quick login -->
-            <el-button class="page-login--quick" size="default" type="info" @click="dialogVisible = true">
+            <!-- <el-button class="page-login--quick" size="default" type="info" @click="dialogVisible = true">
               快速选择用户（测试功能）
-            </el-button>
+            </el-button> -->
           </div>
         </div>
         <div class="page-login--content-footer">
-          <p class="page-login--content-footer-locales">
+          <!-- <p class="page-login--content-footer-locales">
             <a
               v-for="language in $languages"
               :key="language.value"
@@ -101,7 +101,7 @@
             <a href="#">帮助</a>
             <a href="#">隐私</a>
             <a href="#">条款</a>
-          </p>
+          </p> -->
         </div>
       </div>
     </div>

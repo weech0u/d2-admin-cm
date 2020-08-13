@@ -77,7 +77,7 @@
       </el-table>
     </template>
     <el-dialog
-      title="收货地址"
+      title="Company"
       :visible.sync="dialogFormVisible"
       @close="clearVisible()"
     >
@@ -252,7 +252,7 @@ export default {
       }
     },
     handleDelete(i) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将删除该公司条目, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"

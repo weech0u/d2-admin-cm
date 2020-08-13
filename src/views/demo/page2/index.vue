@@ -13,16 +13,6 @@
           round
           >添加合同</el-button
         >
-        <!-- <el-button
-          type="warning"
-          @click="
-            resetForm();
-            dialogFormVisible = true;
-            addFlag = true;
-          "
-          round
-          >从Excel导入公司</el-button
-        > -->
         <el-button
           @click="getContractList()"
           style="float:right"
@@ -33,6 +23,15 @@
           style="float:right;width:20%;"
           placeholder="根据合同名称查询"
         ></el-input>
+        <el-select
+          v-model="contractstatus"
+          style="float:right;width:10%;margin-right:10px"
+          placeholder="合同状态"
+        >
+          <el-option label="默认" value="200"></el-option>
+          <el-option label="在期" value="1"></el-option>
+          <el-option label="已过期" value="0"></el-option>
+        </el-select>
       </el-row>
     </template>
     <template>
@@ -64,29 +63,25 @@
             >
           </template>
         </el-table-column>
-        <el-table-column
-          prop="expire_time"
-          label="过期时间"
-          width="110"
-        ></el-table-column>
+        <el-table-column prop="expire_time" label="过期时间"></el-table-column>
         <el-table-column
           prop="content"
           label="合同内容"
-          width="150"
           :show-overflow-tooltip="true"
-        ></el-table-column>
-        <el-table-column
-          prop="partyA"
-          label="甲方"
-          width="135"
-        ></el-table-column>
-        <el-table-column
-          prop="partyB"
-          label="乙方"
-          width="135"
-        ></el-table-column>
+        >
+          <div class="demo-image__preview">
+            <el-image
+              style="width: 100px; height: 100px"
+              :src="url"
+              :preview-src-list="srcList"
+            >
+            </el-image>
+          </div>
+        </el-table-column>
+        <el-table-column prop="partyA" label="甲方"></el-table-column>
+        <el-table-column prop="partyB" label="乙方"></el-table-column>
         <!-- <el-table-column prop="remarks" label="备注"></el-table-column> -->
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="240">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -120,7 +115,7 @@
 
     <!-- 添加合同start -->
     <el-dialog
-      title="添加合同"
+      title="Contract"
       :visible.sync="dialogFormVisible"
       @close="clearVisible()"
     >
@@ -136,7 +131,11 @@
           <el-input v-model="form.id"></el-input>
         </el-form-item>
         <el-form-item label="合同编号">
-          <el-input placeholder="编号将自动生成/不可编辑" disable></el-input>
+          <el-input
+            v-model="form.number"
+            placeholder="编号将自动生成/不可编辑"
+            disabled
+          ></el-input>
         </el-form-item>
         <el-form-item label="合同名称">
           <el-input v-model="form.name" ref="name"></el-input>
@@ -150,26 +149,42 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="合同内容" type="textarea">
-          <el-input type="textarea" v-model="form.content"></el-input>
+          <el-upload
+            name="image"
+            ref="upload"
+            class="upload-demo"
+            action="http://localhost:8000/api/image"
+            :before-upload="beforeUploadFile"
+            :on-change="fileChange"
+            :auto-upload="false"
+            multiple
+            :limit="3"
+            :file-list="fileList"
+          >
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">
+              只能上传jpg/png文件，且不超过500kb
+            </div>
+          </el-upload>
         </el-form-item>
         <el-form-item label="备注" type="textarea">
           <el-input type="textarea" v-model="form.remarks"></el-input>
         </el-form-item>
-        <el-form-item label="选择甲方">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
+        <el-form-item label="甲方">
+          <el-select v-model="form.partyA" placeholder="请选择甲方">
             <el-option
-              v-for="item in contractList"
-              :key="item.id"
+              v-for="(item, index) in contractList"
+              :key="index"
               :label="item.name"
               :value="item.id"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="选择乙方">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
+        <el-form-item label="乙方">
+          <el-select v-model="form.partyB" placeholder="请选择乙方">
             <el-option
-              v-for="item in contractList"
-              :key="item.id"
+              v-for="(item, index) in contractList"
+              :key="index"
               :label="item.name"
               :value="item.id"
             ></el-option>
@@ -183,6 +198,16 @@
           v-if="addFlag"
           @click="
             addContract();
+            clearVisible();
+            submitUpload();
+          "
+          >确 定</el-button
+        >
+        <el-button
+          type="primary"
+          v-if="!addFlag"
+          @click="
+            editContract();
             clearVisible();
           "
           >确 定</el-button
@@ -206,17 +231,32 @@
         <el-form-item label="服务名">
           <el-input v-model="serviceform.name" :disabled="lock"></el-input>
         </el-form-item>
+        <el-form-item label="价格信息">
+          <el-input
+            v-model="serviceform.price_info"
+            :disabled="lock"
+          ></el-input>
+        </el-form-item>
         <el-form-item label="结算方式">
           <el-input v-model="serviceform.pay_way" :disabled="lock"></el-input>
         </el-form-item>
         <el-form-item label="每日结算日(区间)">
-          <el-input v-model="serviceform.monthly_pay_range" :disabled="lock"></el-input>
+          <el-input
+            v-model="serviceform.monthly_pay_range"
+            :disabled="lock"
+          ></el-input>
         </el-form-item>
         <el-form-item label="实际使用量">
-          <el-input v-model="serviceform.usage_balance" :disabled="lock"></el-input>
+          <el-input
+            v-model="serviceform.usage_balance"
+            :disabled="lock"
+          ></el-input>
         </el-form-item>
         <el-form-item label="余额">
-          <el-input v-model="serviceform.rest_balance" :disabled="lock"></el-input>
+          <el-input
+            v-model="serviceform.rest_balance"
+            :disabled="lock"
+          ></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -266,6 +306,7 @@ export default {
         partyA: "",
         partyB: ""
       },
+      file: "",
       serviceform: {},
       total_count: 0,
       currentPage1: 1,
@@ -274,10 +315,34 @@ export default {
       keywords: "",
       loading: true,
       contractList: [],
-      lock: true
+      lock: true,
+      contractstatus: "",
+      url:
+        "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
+      srcList: [
+        "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
+        "https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg"
+      ],
+      fileList: []
     };
   },
   methods: {
+    submitUpload() {
+        console.log('a')
+      this.$refs.upload.submit();
+    },
+    beforeUploadFile(file) {
+      console.log(file);
+    },
+    fileChange(file, fileList) {
+      console.log("change");
+      console.log(file);
+      this.form.content = file.raw;
+      console.log(this.file);
+      console.log(typeof this.file);
+      this.fileList = fileList;
+      console.log(fileList);
+    },
     async getService(id, page = 1) {
       try {
         const res = await this.$api.getList(
@@ -285,16 +350,20 @@ export default {
           page,
           "contract_id=" + id
         );
-        this.serviceform = res._list[0]
-        console.log(this.serviceform)
-      } catch(error) {
-          console.log(error)
+        console.log(res);
+        if (res._list.length != 0) {
+          this.serviceform = res._list[0];
+        } else {
+          this.serviceform = {};
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     // 加载可以添加的公司
     async loadCompany() {
       try {
-        const res = await this.$api.getList("contract");
+        const res = await this.$api.getList("company");
         for (let item of res._list) {
           this.contractList.push({
             id: +item.id,
@@ -350,7 +419,6 @@ export default {
     async addContract() {
       try {
         const res = await this.$api.addList("contract", this.getJSON());
-        console.log(res);
         this.$notify({
           title: "成功",
           message: "添加成功",
@@ -362,12 +430,22 @@ export default {
     },
     getJSON() {
       let form = this.form;
+      let et = new Date(form.expire_time);
+      let contentImg = "";
+      console.log(this.form.content);
+      for (let i of this.fileList) {
+        contentImg += i.name + ",";
+      }
+      console.log(contentImg);
       return {
+        number: form.number,
         name: form.name,
-        address: form.address,
-        account: form.account,
-        contact_person: form.contact_person,
-        contact_number: form.contact_number
+        expire_time:
+          et.getFullYear() + "-" + (et.getMonth() + 1) + "-" + et.getDate(),
+        content: contentImg,
+        remarks: form.remarks,
+        partyA_id: form.partyA,
+        partyB_id: form.partyB
       };
     },
     resetForm() {
@@ -376,7 +454,7 @@ export default {
       }
     },
     handleDelete(i) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将永久删除该合同条目, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
@@ -415,6 +493,11 @@ h3 {
 .el-pagination {
   padding-top: 20px;
   text-align: center;
+}
+
+.el-upload__tip::before {
+  content: "*";
+  color: red;
 }
 
 .el-dialog__footer {

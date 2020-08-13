@@ -70,7 +70,6 @@
             <el-button
               size="mini"
               @click="
-                getOneCompanyList(companyData[scope.$index].id);
                 dialogFormVisible = true;
                 editFlag = true;
               "
@@ -87,7 +86,7 @@
       </el-table>
     </template>
     <el-dialog
-      title="收货地址"
+      title="Service"
       :visible.sync="dialogFormVisible"
       @close="clearVisible()"
     >
@@ -260,7 +259,7 @@ export default {
       }
     },
     handleDelete(i) {
-      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+      this.$confirm("此操作将永久删除该服务条目, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
